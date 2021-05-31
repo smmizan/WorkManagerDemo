@@ -3,6 +3,7 @@ package com.smmizan.workmanagerdemo;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
@@ -12,8 +13,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.concurrent.TimeUnit;
+
 public class MainActivity extends AppCompatActivity {
-    Button bNotify;
+    Button bNotify,bStop;
     TextView tStatus;
 
     @Override
@@ -23,21 +26,35 @@ public class MainActivity extends AppCompatActivity {
 
 
         bNotify = findViewById(R.id.buttton);
+        bStop = findViewById(R.id.butttonStop);
         tStatus = findViewById(R.id.textView);
 
 
-        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(MyWorker.class).build();
+        // one time workrequest
+        //OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(MyWorker.class).build();
+
+
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(MyWorker.class,15, TimeUnit.MINUTES).build();
 
 
         bNotify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WorkManager.getInstance(MainActivity.this).enqueue(request);
+                WorkManager.getInstance(MainActivity.this).enqueue(periodicWorkRequest);
             }
         });
 
 
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.getId())
+
+        bStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WorkManager.getInstance(MainActivity.this).cancelWorkById(periodicWorkRequest.getId());
+            }
+        });
+
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.getId())
                 .observe(this, new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {

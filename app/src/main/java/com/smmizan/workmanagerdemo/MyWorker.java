@@ -24,17 +24,23 @@ public class MyWorker  extends Worker {
         return Result.success();
     }
 
-    private void  showNotification(String title,String description){
+
+    @Override
+    public void onStopped() {
+        super.onStopped();
+    }
+
+    private void  showNotification(String title, String description){
 
         NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel = new NotificationChannel("notifyid","notifyname",NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel("miz","miz",NotificationManager.IMPORTANCE_DEFAULT);
             manager.createNotificationChannel(channel);
         }
 
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),"mizan")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),"miz")
                 .setContentTitle(title)
                 .setContentText(description)
                 .setSmallIcon(R.mipmap.ic_launcher);
