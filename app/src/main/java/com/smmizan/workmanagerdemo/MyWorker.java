@@ -7,6 +7,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -20,8 +21,15 @@ public class MyWorker  extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        showNotification("My Notify","This is simple notification");
-        return Result.success();
+
+        Data retriveData = getInputData();
+        String desc = retriveData.getString("input_data");
+
+        showNotification("My Notify",desc);
+
+        Data outputData = new Data.Builder().putString("output_date","this is my output data from worker class").build();
+
+        return Result.success(outputData);
     }
 
 

@@ -3,6 +3,7 @@ package com.smmizan.workmanagerdemo;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
+import androidx.work.Data;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -33,8 +34,9 @@ public class MainActivity extends AppCompatActivity {
         tStatus = findViewById(R.id.textView);
 
 
-        // one time workrequest
-        //OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(MyWorker.class).build();
+
+        // data input/output
+        Data inputDate = new Data.Builder().putString("input_data","this is an input data from MainActivity class").build();
 
 
         Constraints constraints = new Constraints.Builder()
@@ -43,15 +45,25 @@ public class MainActivity extends AppCompatActivity {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(MyWorker.class,15, TimeUnit.MINUTES)
+        // one time workrequest
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(MyWorker.class)
                 .setConstraints(constraints)
+                .setInputData(inputDate)
                 .build();
+
+
+
+
+//        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(MyWorker.class,15, TimeUnit.MINUTES)
+//                .setConstraints(constraints)
+//                .setInputData(inputDate)
+//                .build();
 
 
         bNotify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WorkManager.getInstance(MainActivity.this).enqueue(periodicWorkRequest);
+                WorkManager.getInstance(MainActivity.this).enqueue(request);
             }
         });
 
@@ -60,18 +72,29 @@ public class MainActivity extends AppCompatActivity {
         bStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WorkManager.getInstance(MainActivity.this).cancelWorkById(periodicWorkRequest.getId());
+                WorkManager.getInstance(MainActivity.this).cancelWorkById(request.getId());
             }
         });
 
 
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.getId())
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.getId())
                 .observe(this, new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         String status = workInfo.getState().name();
                         tStatus.append(status + "\n");
                         Log.d("mizan",status);
+
+                        if(workInfo != null){
+                            if(workInfo.getState().isFinished()){
+                                Data retriveData = workInfo.getOutputData();
+                                String outputData = retriveData.getString("output_date");
+                                tStatus.append(outputData + "\n");
+
+                            }
+                        }
+
+
                     }
                 });
 
