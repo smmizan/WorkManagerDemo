@@ -2,11 +2,14 @@ package com.smmizan.workmanagerdemo;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import android.net.Network;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +37,15 @@ public class MainActivity extends AppCompatActivity {
         //OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(MyWorker.class).build();
 
 
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(MyWorker.class,15, TimeUnit.MINUTES).build();
+        Constraints constraints = new Constraints.Builder()
+                //METERED = Data Connection
+                //UNMETERED = Wifi
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(MyWorker.class,15, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build();
 
 
         bNotify.setOnClickListener(new View.OnClickListener() {
